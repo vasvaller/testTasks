@@ -21,7 +21,7 @@ public class PriceJoinerUtil {
     }
 
 
-    return result;
+    return joinedListWithIntersections;
   }
 
   private static boolean arePricesDatesIntersect(Price newPrice, Price oldPrice) {
@@ -52,6 +52,4 @@ public class PriceJoinerUtil {
     }
     return result;
   }
-
-  public static
 }
