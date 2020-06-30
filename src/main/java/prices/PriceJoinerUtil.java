@@ -12,23 +12,42 @@ public class PriceJoinerUtil {
   private long value;         // значение цены в копейках
 
   public static Collection<Price> joinPrices(LinkedList<Price> oldPrices, LinkedList<Price> newPrices) {
-    LinkedList<Price> joinedListWithIntersections = new LinkedList<>();
-    for (int i = 0; i < oldPrices.size(); i++) {
-      Price firstFromOldList = oldPrices.remove(0);
-      joinedListWithIntersections.add(firstFromOldList);
-      joinedListWithIntersections.addAll(getSamePricesByCodeAndNumberAndDeparture(Collections.unmodifiableList(oldPrices), firstFromOldList));
+    LinkedList<Price> result = new LinkedList<>();
 
+    while (oldPrices.size() != 0) {
+      LinkedList<Price> oldPricesForProcessing = new LinkedList<>();
+
+      // get current price and same prices
+      Price currentPrice = oldPrices.remove(0);
+      List<Price> samePrices = getSamePricesByCodeAndNumberAndDeparture(oldPrices, currentPrice);
+
+      // put same prices to list for processing
+      oldPricesForProcessing.add(currentPrice);
+      oldPricesForProcessing.addAll(samePrices);
+      oldPrices.removeAll(samePrices);
+
+      // find same price in newPrices
+      LinkedList<Price> newPricesForProcessing = new LinkedList<>(getSamePricesByCodeAndNumberAndDeparture(newPrices, currentPrice));
+      newPrices.removeAll(newPricesForProcessing);
+
+      // now we have two lists based on currentPrice with intersections probably
+      result.addAll(processIntersections(oldPricesForProcessing, newPricesForProcessing));
     }
 
+    // add all remaining prices from new prices
+    result.addAll(newPrices);
+    return result;
+  }
 
-    return joinedListWithIntersections;
+  private static List<Price> processIntersections(LinkedList<Price> oldPricesForProcessing, LinkedList<Price> newPricesForProcessing) {
+    return new LinkedList<>(); //TODO write joining method here
   }
 
   private static boolean arePricesDatesIntersect(Price newPrice, Price oldPrice) {
-    Long begin1 = oldPrice.getBegin().getTime();
-    Long begin2 = newPrice.getBegin().getTime();
-    Long end1 = oldPrice.getEnd().getTime();
-    Long end2 = newPrice.getEnd().getTime();
+    long begin1 = oldPrice.getBegin().getTime();
+    long begin2 = newPrice.getBegin().getTime();
+    long end1 = oldPrice.getEnd().getTime();
+    long end2 = newPrice.getEnd().getTime();
     return !(end1 < begin2 || begin1 > end2);
   }
 
