@@ -27,4 +27,13 @@ public class Price {
     this.end = simpleDateFormat.parse(end);
     this.value = value;
   }
+
+  public Price(Price priceReference) {
+    this.productCode = priceReference.getProductCode();
+    this.number = priceReference.getNumber();
+    this.depart = priceReference.getDepart();
+    this.begin = priceReference.getBegin();
+    this.end = priceReference.getEnd();
+    this.value = priceReference.getValue();
+  }
 }
