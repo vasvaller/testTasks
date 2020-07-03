@@ -4,9 +4,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 
 public class PriceJoinerUtilTest {
+
   // test datetime
   String jan = "01.01.2020 00:00:00";
   String feb = "01.02.2020 00:00:00";
@@ -41,6 +44,7 @@ public class PriceJoinerUtilTest {
 
   /**
    * Tests for resolve every single conflict in method resolveConflict()
+   *
    * @throws ParseException If datetime is incorrect. Pattern is: dd.MM.yyyy HH:mm:ss
    */
   @Test
