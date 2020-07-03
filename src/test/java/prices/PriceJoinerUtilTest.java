@@ -7,27 +7,11 @@ import java.text.ParseException;
 import java.util.*;
 
 public class PriceJoinerUtilTest {
-  // тестовые дата-время
+  // test datetime
   String jan = "01.01.2020 00:00:00";
-  String janBeg = "01.01.2020 00:00:01";
-  String janEnd = "31.01.2020 23:59:59";
   String feb = "01.02.2020 00:00:00";
-  String febBeg = "01.02.2020 00:00:01";
-  String febEnd = "29.02.2020 23:59:59";
   String mar = "01.03.2020 00:00:00";
-  String marBeg = "01.03.2020 00:00:01";
-  String marEnd = "31.03.2020 23:59:59";
   String apr = "01.04.2020 00:00:00";
-  String aprBeg = "01.04.2020 00:00:01";
-  String aprEnd = "30.04.2020 23:59:59";
-  String may = "01.05.2020 00:00:00";
-  String jun = "01.06.2020 00:00:00";
-  String jul = "01.07.2020 00:00:00";
-  String aug = "01.08.2020 00:00:00";
-  String sep = "01.09.2020 00:00:00";
-  String oct = "01.10.2020 00:00:00";
-  String nov = "01.11.2020 00:00:00";
-  String dec = "01.12.2020 00:00:00";
 
   @Test
   public void priceJoin() throws ParseException {
