@@ -116,7 +116,7 @@ public class PriceJoinerUtil {
   /**
    * Resolves conflict of intersected dates
    * There are 11 different cases of relative position of timelines
-   * ( See "Variants.jpg" )
+   * (See "<code>resources/prices_intersecations_cases.png</code>)
    *
    * @param oldP                   old price conflicts with new price
    * @param newP                   new price conflicts with old price
