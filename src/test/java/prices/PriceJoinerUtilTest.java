@@ -183,12 +183,5 @@ public class PriceJoinerUtilTest {
     Assert.assertArrayEquals("в processList 3.4: ", expPriceInProcessList.toArray(), oldPricesForProcessing.toArray());
     oldPricesForProcessing.clear();
     newPricesForProcessing.clear();
-
-    //TODO написать expected
-
-
-
-    //TODO написать ассерты
-
   }
 }
