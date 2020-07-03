@@ -3,14 +3,6 @@ package prices;
 import java.util.*;
 
 public class PriceJoinerUtil {
-  private long id;            // идентификатор в БД
-  private String productCode; // код товара
-  private int number;         // номер цены
-  private int depart;         // номер отдела
-  private Date begin;         // начало действия
-  private Date end;           // конец действия
-  private long value;         // значение цены в копейках
-
   /**
    * Main method for this application
    * @param oldPrices list of old prices
