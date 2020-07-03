@@ -16,6 +16,7 @@ public class PriceJoinerUtil {
 
   /**
    * Главный тестируемый высокоуровневый метод (сама суть программы)
+   *
    * @param oldPrices данные со старыми ценами
    * @param newPrices данные с новыми ценами
    * @return возвращает коллекцию с объединенными ценами
@@ -50,6 +51,7 @@ public class PriceJoinerUtil {
 
   /**
    * в рамках одной цены
+   *
    * @param oldPricesForProcessing list of old selected single price history
    * @param newPricesForProcessing list of new selected single price history
    * @return joined list
@@ -98,61 +100,64 @@ public class PriceJoinerUtil {
   public static List<Price> resolveConflict(Price oldP, Price newP, LinkedList<Price> oldPricesForProcessing, LinkedList<Price> newPricesForProcessing) {
     LinkedList<Price> result = new LinkedList<>();
 
-
     if (oldP.getBegin().equals(newP.getBegin())) { // 1. Begin times equals
       if (oldP.getEnd().after(newP.getEnd())) { // 1.1. 1st end time after 2nd end time
-        oldP.setBegin(new Date(newP.getEnd().getTime() + 1));
+        oldP.setBegin(new Date(newP.getEnd().getTime() + 1000));
         oldPricesForProcessing.add(oldP);
         result.add(newP);
-        result.add(oldP);
       } else if (oldP.getEnd().equals(newP.getEnd())) { // 1.2. 1st end time equal 2nd end time
         result.add(newP);
       } else if (oldP.getEnd().before(newP.getEnd())) { // 1.3. 1st end time before 2nd end time
+        result.add(newP);
         newPricesForProcessing.add(0, newP);
-      } else if (oldP.getBegin().before(newP.getBegin())) { // 2. 1st begin time before 2nd begin time
-        if (oldP.getEnd().after(newP.getEnd())) { // 2.1. 1st end time after 2nd end time
-          Price secondPartOfOldP = new Price(oldP);
-          secondPartOfOldP.setBegin(new Date(newP.getEnd().getTime() + 1));
-          oldP.setEnd(new Date(newP.getBegin().getTime() - 1));
-          result.add(oldP);
-          result.add(newP);
-          oldPricesForProcessing.add(0, secondPartOfOldP);
-        } else if (oldP.getEnd().equals(newP.getEnd())) { // 2.2. 1st end time equal 2nd end time
-          oldP.setEnd(new Date(newP.getBegin().getTime() - 1));
-          result.add(oldP);
-          result.add(newP);
-        } else if (oldP.getEnd().before(newP.getEnd())) { // 2.3. 1st end time before 2nd end time
-          oldP.setEnd(new Date(newP.getBegin().getTime() - 1));
-          result.add(oldP);
-          newPricesForProcessing.add(0, newP);
-        }
-      } else if (oldP.getBegin().after(newP.getBegin())) { // 3. 1st begin time after 2nd begin time
-        if (oldP.getBegin().equals(newP.getEnd())) { // 3.1. 1st begin time equal 2nd end time
-          oldP.setBegin(new Date(newP.getEnd().getTime() + 1));
-          oldPricesForProcessing.add(0, oldP);
-          result.add(newP);
-        } else if (oldP.getEnd().after(newP.getEnd())) { // 3.2. 1st end time after 2nd end time
-          oldP.setBegin(new Date(newP.getEnd().getTime() + 1));
-          oldPricesForProcessing.add(0, oldP);
-          result.add(newP);
-        } else if (oldP.getEnd().equals(newP.getEnd())) { // 3.3. 1st end time equal 2nd end time
-          result.add(newP);
-        } else if (oldP.getEnd().before(newP.getEnd())) { // 3.4. 1st end time before 2nd end time
-          newPricesForProcessing.add(0, newP);
-        }
-      } else if (oldP.getEnd().equals(newP.getBegin())) {// 4. 1st END time equal 2nd BEGIN time
-          oldP.setEnd(new Date(newP.getBegin().getTime() - 1));
-      } else try {
-        throw new Exception("Решение конфликта пошло не по сценарию");
-      } catch (Exception e) {
-        e.printStackTrace();
       }
+    } else if (oldP.getBegin().before(newP.getBegin())) { // 2. 1st begin time before 2nd begin time
+      if (oldP.getEnd().after(newP.getEnd())) { // 2.1. 1st end time after 2nd end time
+        Price secondPartOfOldP = new Price(oldP);
+        secondPartOfOldP.setBegin(new Date(newP.getEnd().getTime() + 1000));
+        oldP.setEnd(new Date(newP.getBegin().getTime() - 1000));
+        oldPricesForProcessing.add(0, secondPartOfOldP);
+        result.add(oldP);
+        result.add(newP);
+      } else if (oldP.getEnd().equals(newP.getEnd())) { // 2.2. 1st end time equal 2nd end time
+        oldP.setEnd(new Date(newP.getBegin().getTime() - 1000));
+        result.add(oldP);
+        result.add(newP);
+      } else if (oldP.getEnd().before(newP.getEnd())) { // 2.3. 1st end time before 2nd end time
+        oldP.setEnd(new Date(newP.getBegin().getTime() - 1000));
+        result.add(oldP);
+        newPricesForProcessing.add(0, newP);
+      } else if (oldP.getEnd().equals(newP.getBegin())) {// 2.4. 1st END time equal 2nd BEGIN time
+        oldP.setEnd(new Date(newP.getBegin().getTime() - 1000));
+        newPricesForProcessing.add(newP);
+        result.add(oldP);
+      }
+    } else if (oldP.getBegin().after(newP.getBegin())) { // 3. 1st begin time after 2nd begin time
+      if (oldP.getBegin().equals(newP.getEnd())) { // 3.1. 1st begin time equal 2nd end time
+        oldP.setBegin(new Date(newP.getEnd().getTime() + 1000));
+        oldPricesForProcessing.add(0, oldP);
+        result.add(newP);
+      } else if (oldP.getEnd().after(newP.getEnd())) { // 3.2. 1st end time after 2nd end time
+        oldP.setBegin(new Date(newP.getEnd().getTime() + 1000));
+        oldPricesForProcessing.add(0, oldP);
+        result.add(newP);
+      } else if (oldP.getEnd().equals(newP.getEnd())) { // 3.3. 1st end time equal 2nd end time
+        result.add(newP);
+      } else if (oldP.getEnd().before(newP.getEnd())) { // 3.4. 1st end time before 2nd end time
+        newPricesForProcessing.add(0, newP);
+        result.add(newP);
+      }
+    } else try {
+      throw new Exception("Решение конфликта пошло не по сценарию");
+    } catch (Exception e) {
+      e.printStackTrace();
     }
     return result;
   }
 
   /**
    * Проверяет есть ли пересечение у двух цен по датам
+   *
    * @return true - есть пересечение, false - нет пересечения
    */
   private static boolean arePricesDatesIntersects(Price oldPrice, Price newPrice) {
@@ -160,7 +165,7 @@ public class PriceJoinerUtil {
     long begin2 = newPrice.getBegin().getTime();
     long end1 = oldPrice.getEnd().getTime();
     long end2 = newPrice.getEnd().getTime();
-    return (end1 > begin2 || begin1 < end2);
+    return (end1 >= begin2 || begin1 <= end2);
   }
 
   /**
