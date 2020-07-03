@@ -55,6 +55,10 @@ public class PriceJoinerUtilTest {
     Assert.assertArrayEquals(expectedPrices.toArray(), result.toArray());
   }
 
+  /**
+   * Tests for resolve every single conflict in method resolveConflict()
+   * @throws ParseException
+   */
   @Test
   public void resolveConflict() throws ParseException {
     LinkedList<Price> oldPricesForProcessing = new LinkedList<>();
@@ -65,7 +69,7 @@ public class PriceJoinerUtilTest {
     Price oldP11 = new Price("122856", 1, 1, jan, mar, 100);
     Price newP11 = new Price("122856", 1, 1, jan, feb, 200);
     LinkedList<Price> exp11 = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, jan, feb, 200)));
-    expPriceInProcessList = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, febBeg, mar, 100)));
+    expPriceInProcessList = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, feb, mar, 100)));
 
     Assert.assertArrayEquals("в result 1.1: ", exp11.toArray(), PriceJoinerUtil.resolveConflict(oldP11, newP11, oldPricesForProcessing, newPricesForProcessing).toArray());
     Assert.assertEquals("в processList 1.1: ", expPriceInProcessList.get(0), oldPricesForProcessing.get(0));
@@ -97,9 +101,9 @@ public class PriceJoinerUtilTest {
     // 2.1
     Price oldP21 = new Price("122856", 1, 1, jan, apr, 100);
     Price newP21 = new Price("122856", 1, 1, feb, mar, 200);
-    LinkedList<Price> exp21 = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, jan, janEnd, 100)));
+    LinkedList<Price> exp21 = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, jan, feb, 100)));
     exp21.add(new Price("122856", 1, 1, feb, mar, 200));
-    expPriceInProcessList = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, marBeg, apr, 100)));
+    expPriceInProcessList = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, mar, apr, 100)));
 
     Assert.assertArrayEquals("в result 2.1: ", exp21.toArray(), PriceJoinerUtil.resolveConflict(oldP21, newP21, oldPricesForProcessing, newPricesForProcessing).toArray());
     Assert.assertArrayEquals("в processList 2.1: ", expPriceInProcessList.toArray(), oldPricesForProcessing.toArray());
@@ -109,7 +113,7 @@ public class PriceJoinerUtilTest {
     // 2.2
     Price oldP22 = new Price("122856", 1, 1, jan, mar, 100);
     Price newP22 = new Price("122856", 1, 1, feb, mar, 200);
-    LinkedList<Price> exp22 = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, jan, janEnd, 100)));
+    LinkedList<Price> exp22 = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, jan, feb, 100)));
     exp22.add(new Price("122856", 1, 1, feb, mar, 200));
     expPriceInProcessList = new LinkedList<>();
 
@@ -121,7 +125,7 @@ public class PriceJoinerUtilTest {
     // 2.3
     Price oldP23 = new Price("122856", 1, 1, jan, mar, 100);
     Price newP23 = new Price("122856", 1, 1, feb, apr, 200);
-    LinkedList<Price> exp23 = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, jan, janEnd, 100)));
+    LinkedList<Price> exp23 = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, jan, feb, 100)));
     expPriceInProcessList = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, feb, apr, 200)));
 
     Assert.assertArrayEquals("в result 2.3: ", exp23.toArray(), PriceJoinerUtil.resolveConflict(oldP23, newP23, oldPricesForProcessing, newPricesForProcessing).toArray());
@@ -132,7 +136,7 @@ public class PriceJoinerUtilTest {
     // 2.4
     Price oldP24 = new Price("122856", 1, 1, jan, feb, 100);
     Price newP24 = new Price("122856", 1, 1, feb, mar, 200);
-    LinkedList<Price> exp24 = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, jan, janEnd, 100)));
+    LinkedList<Price> exp24 = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, jan, feb, 100)));
     expPriceInProcessList = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, feb, mar, 200)));
 
     Assert.assertArrayEquals("в result 2.4: ", exp24.toArray(), PriceJoinerUtil.resolveConflict(oldP24, newP24, oldPricesForProcessing, newPricesForProcessing).toArray());
@@ -144,7 +148,7 @@ public class PriceJoinerUtilTest {
     Price oldP31 = new Price("122856", 1, 1, feb, mar, 100);
     Price newP31 = new Price("122856", 1, 1, jan, feb, 200);
     LinkedList<Price> exp31 = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, jan, feb, 200)));
-    expPriceInProcessList = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, febBeg, mar, 100)));
+    expPriceInProcessList = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, feb, mar, 100)));
 
     Assert.assertArrayEquals("в result 3.1: ", exp31.toArray(), PriceJoinerUtil.resolveConflict(oldP31, newP31, oldPricesForProcessing, newPricesForProcessing).toArray());
     Assert.assertArrayEquals("в processList 3.1: ", expPriceInProcessList.toArray(), oldPricesForProcessing.toArray());
@@ -155,7 +159,7 @@ public class PriceJoinerUtilTest {
     Price oldP32 = new Price("122856", 1, 1, feb, apr, 100);
     Price newP32 = new Price("122856", 1, 1, jan, mar, 200);
     LinkedList<Price> exp32 = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, jan, mar, 200)));
-    expPriceInProcessList = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, marBeg, apr, 100)));
+    expPriceInProcessList = new LinkedList<>(Arrays.asList(new Price("122856", 1, 1, mar, apr, 100)));
 
     Assert.assertArrayEquals("в result 3.2: ", exp32.toArray(), PriceJoinerUtil.resolveConflict(oldP32, newP32, oldPricesForProcessing, newPricesForProcessing).toArray());
     Assert.assertArrayEquals("в processList 3.2: ", expPriceInProcessList.toArray(), oldPricesForProcessing.toArray());

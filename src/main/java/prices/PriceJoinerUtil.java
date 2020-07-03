@@ -1,9 +1,6 @@
 package prices;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class PriceJoinerUtil {
   private long id;            // идентификатор в БД
@@ -15,11 +12,10 @@ public class PriceJoinerUtil {
   private long value;         // значение цены в копейках
 
   /**
-   * Главный тестируемый высокоуровневый метод (сама суть программы)
-   *
-   * @param oldPrices данные со старыми ценами
-   * @param newPrices данные с новыми ценами
-   * @return возвращает коллекцию с объединенными ценами
+   * Main method for this application
+   * @param oldPrices list of old prices
+   * @param newPrices list of new prices
+   * @return Collection with joined prices
    */
   public static Collection<Price> joinPrices(LinkedList<Price> oldPrices, LinkedList<Price> newPrices) {
     LinkedList<Price> result = new LinkedList<>();
@@ -40,7 +36,7 @@ public class PriceJoinerUtil {
       LinkedList<Price> newPricesForProcessing = new LinkedList<>(getSamePricesByCodeAndNumberAndDeparture(newPrices, currentPrice));
       newPrices.removeAll(newPricesForProcessing);
 
-      // now we have two lists based on currentPrice with intersections probably
+      // now we have two lists based on currentPrice with intersections
       result.addAll(processIntersections(oldPricesForProcessing, newPricesForProcessing));
     }
 
@@ -50,59 +46,90 @@ public class PriceJoinerUtil {
   }
 
   /**
-   * в рамках одной цены
+   * Combines prices with same end datetime and begin datetime to single
    *
-   * @param oldPricesForProcessing list of old selected single price history
-   * @param newPricesForProcessing list of new selected single price history
-   * @return joined list
+   * @param listForCombining not pured list
+   * @return pured list
    */
-  private static List<Price> processIntersections(LinkedList<Price> oldPricesForProcessing, LinkedList<Price> newPricesForProcessing) {
+  private static LinkedList<Price> combineConsecuentivePrices(LinkedList<Price> listForCombining) {
     LinkedList<Price> result = new LinkedList<>();
-    while (newPricesForProcessing.size() != 0) {
-      Price currentNewPrice = newPricesForProcessing.remove(0);
 
-      // пока очереди не пустые проверяем на пересечение элементы в порядке упоминания дат
-      while (oldPricesForProcessing.size() != 0 && newPricesForProcessing.size() != 0) {
-        Price oldP = oldPricesForProcessing.remove(0);
-        Price newP = oldPricesForProcessing.remove(0);
+    while (listForCombining.size() > 1) {
+      Price price = listForCombining.remove(0);
+      Price priceNext = listForCombining.get(0);
 
-        // если пересекаются решаем конфликт
-        if (arePricesDatesIntersects(oldP, newP)) {
-          result.addAll(resolveConflict(oldP, newP, oldPricesForProcessing, newPricesForProcessing));
-        } else { // если не пересекаются - добавляем в резалт ту цену, которая раньше по графику и вторую возвращаем в свою очередь на обработку первым элементом
-          if (oldP.getEnd().getTime() < newP.getBegin().getTime()) {
-            result.add(oldP);
-            newPricesForProcessing.add(0, newP);
-          } else if (newP.getEnd().getTime() < oldP.getBegin().getTime()) {
-            result.add(newP);
-            oldPricesForProcessing.add(0, oldP);
-          }
+      if (price.getProductCode().equals(priceNext.getProductCode())
+          && price.getNumber() == priceNext.getNumber()
+          && price.getDepart() == priceNext.getDepart()
+          && price.getValue().equals(priceNext.getValue())
+          && priceNext.getBegin().getTime() - price.getEnd().getTime() <= 1000) {
+        listForCombining.remove(0);
+        price.setEnd(priceNext.getEnd());
+        result.add(price);
+      } else { // otherwise add first price to result and start again
+        result.add(price);
+        if (listForCombining.size() == 1) {
+          result.add(priceNext);
+          break;
         }
       }
-
-      // остаток одной из очередей просто добавим в результат
-      if (oldPricesForProcessing.size() == 0) result.addAll(newPricesForProcessing);
-      else result.addAll(oldPricesForProcessing);
     }
     return result;
   }
 
   /**
-   * Решит конфликт, вернет список того что нужно положить в резалт.
-   * Есть 11 возможных ситуаций относительного расположения временных отрезков.
-   * Для наглядности см. графическое представление Variants.jpg где нибудь в каталоге рядом с исходниками проекта
+   * Creates list of
    *
-   * @param oldP
-   * @param newP
-   * @param oldPricesForProcessing
-   * @param newPricesForProcessing
+   * @param oldPricesForProcessing list of old selected single price history
+   * @param newPricesForProcessing list of new selected single price history
+   * @return joined list
+   */
+  public static List<Price> processIntersections(LinkedList<Price> oldPricesForProcessing, LinkedList<Price> newPricesForProcessing) {
+    LinkedList<Price> result = new LinkedList<>();
+    Collections.sort(oldPricesForProcessing);
+    Collections.sort(newPricesForProcessing);
+
+    while (oldPricesForProcessing.size() > 0 && newPricesForProcessing.size() > 0) {
+      Price oldP = oldPricesForProcessing.remove(0);
+      Price newP = newPricesForProcessing.remove(0);
+
+      // if there is conflict resolve it
+      if (arePricesDatesIntersects(oldP, newP)) {
+        result.addAll(resolveConflict(oldP, newP, oldPricesForProcessing, newPricesForProcessing));
+      } else { // если не пересекаются - добавляем в резалт ту цену, которая раньше по графику и вторую возвращаем в свою очередь на обработку первым элементом
+        if (oldP.getEnd().getTime() < newP.getBegin().getTime()) {
+          result.add(oldP);
+          newPricesForProcessing.add(0, newP);
+        } else if (newP.getEnd().getTime() < oldP.getBegin().getTime()) {
+          result.add(newP);
+          oldPricesForProcessing.add(0, oldP);
+        }
+      }
+
+      if (oldPricesForProcessing.size() == 0) result.addAll(newPricesForProcessing);
+      else result.addAll(oldPricesForProcessing);
+    }
+    result = combineConsecuentivePrices(result);
+    return result;
+  }
+
+  /**
+   * Resolves conflict of intersected dates
+   * There are 11 different cases of relative position of timelines
+   * ( See "Variants.jpg" )
+   *
+   * @param oldP                   old price conflicts with new price
+   * @param newP                   new price conflicts with old price
+   * @param oldPricesForProcessing all history cases of the same old price
+   * @param newPricesForProcessing all history cases of the same new price
+   * @return list of resolved dated.
    */
   public static List<Price> resolveConflict(Price oldP, Price newP, LinkedList<Price> oldPricesForProcessing, LinkedList<Price> newPricesForProcessing) {
     LinkedList<Price> result = new LinkedList<>();
 
     if (oldP.getBegin().equals(newP.getBegin())) { // 1. Begin times equals
       if (oldP.getEnd().after(newP.getEnd())) { // 1.1. 1st end time after 2nd end time
-        oldP.setBegin(new Date(newP.getEnd().getTime() + 1000));
+        oldP.setBegin(new Date(newP.getEnd().getTime() + 0));
         oldPricesForProcessing.add(oldP);
         result.add(newP);
       } else if (oldP.getEnd().equals(newP.getEnd())) { // 1.2. 1st end time equal 2nd end time
@@ -114,31 +141,31 @@ public class PriceJoinerUtil {
     } else if (oldP.getBegin().before(newP.getBegin())) { // 2. 1st begin time before 2nd begin time
       if (oldP.getEnd().after(newP.getEnd())) { // 2.1. 1st end time after 2nd end time
         Price secondPartOfOldP = new Price(oldP);
-        secondPartOfOldP.setBegin(new Date(newP.getEnd().getTime() + 1000));
-        oldP.setEnd(new Date(newP.getBegin().getTime() - 1000));
+        secondPartOfOldP.setBegin(new Date(newP.getEnd().getTime() + 0));
+        oldP.setEnd(new Date(newP.getBegin().getTime() - 0));
         oldPricesForProcessing.add(0, secondPartOfOldP);
         result.add(oldP);
         result.add(newP);
       } else if (oldP.getEnd().equals(newP.getEnd())) { // 2.2. 1st end time equal 2nd end time
-        oldP.setEnd(new Date(newP.getBegin().getTime() - 1000));
+        oldP.setEnd(new Date(newP.getBegin().getTime() - 0));
         result.add(oldP);
         result.add(newP);
       } else if (oldP.getEnd().before(newP.getEnd())) { // 2.3. 1st end time before 2nd end time
-        oldP.setEnd(new Date(newP.getBegin().getTime() - 1000));
+        oldP.setEnd(new Date(newP.getBegin().getTime() - 0));
         result.add(oldP);
         newPricesForProcessing.add(0, newP);
       } else if (oldP.getEnd().equals(newP.getBegin())) {// 2.4. 1st END time equal 2nd BEGIN time
-        oldP.setEnd(new Date(newP.getBegin().getTime() - 1000));
+        oldP.setEnd(new Date(newP.getBegin().getTime() - 0));
         newPricesForProcessing.add(newP);
         result.add(oldP);
       }
     } else if (oldP.getBegin().after(newP.getBegin())) { // 3. 1st begin time after 2nd begin time
       if (oldP.getBegin().equals(newP.getEnd())) { // 3.1. 1st begin time equal 2nd end time
-        oldP.setBegin(new Date(newP.getEnd().getTime() + 1000));
+        oldP.setBegin(new Date(newP.getEnd().getTime() + 0));
         oldPricesForProcessing.add(0, oldP);
         result.add(newP);
       } else if (oldP.getEnd().after(newP.getEnd())) { // 3.2. 1st end time after 2nd end time
-        oldP.setBegin(new Date(newP.getEnd().getTime() + 1000));
+        oldP.setBegin(new Date(newP.getEnd().getTime() + 0));
         oldPricesForProcessing.add(0, oldP);
         result.add(newP);
       } else if (oldP.getEnd().equals(newP.getEnd())) { // 3.3. 1st end time equal 2nd end time
@@ -148,7 +175,7 @@ public class PriceJoinerUtil {
         result.add(newP);
       }
     } else try {
-      throw new Exception("Решение конфликта пошло не по сценарию");
+      throw new Exception("FAIL: exception situation in resolveConflict()");
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -156,29 +183,29 @@ public class PriceJoinerUtil {
   }
 
   /**
-   * Проверяет есть ли пересечение у двух цен по датам
+   * Checks is whether there some intersection of two dates
    *
-   * @return true - есть пересечение, false - нет пересечения
+   * @return true - there is intersection, false - no intersection
    */
   private static boolean arePricesDatesIntersects(Price oldPrice, Price newPrice) {
     long begin1 = oldPrice.getBegin().getTime();
     long begin2 = newPrice.getBegin().getTime();
     long end1 = oldPrice.getEnd().getTime();
     long end2 = newPrice.getEnd().getTime();
-    return (end1 >= begin2 || begin1 <= end2);
+    return (end1 > begin2 || begin1 < end2);
   }
 
   /**
-   * @return Вернет лист историю (все варианты) переданной цены из переданного списка
+   * @return Returns list of all cases of "searchPrice" from "searchList"
    */
-  public static List<Price> getSamePricesByCodeAndNumberAndDeparture(List<Price> fromList, Price searchPrice) {
+  public static List<Price> getSamePricesByCodeAndNumberAndDeparture(List<Price> searchList, Price searchPrice) {
     List<Price> result = new LinkedList<>();
 
     String productCodeSearch = searchPrice.getProductCode();
     int numberSearch = searchPrice.getNumber();
     int departSearch = searchPrice.getDepart();
 
-    for (Price priceFromList : fromList) {
+    for (Price priceFromList : searchList) {
       String productCodeFromList = priceFromList.getProductCode();
       int numberFromList = priceFromList.getNumber();
       int departFromList = priceFromList.getDepart();

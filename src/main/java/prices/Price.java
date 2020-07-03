@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Data
-public class Price {
+public class Price implements Comparable{
   private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
   private long id;            // идентификатор в БД
@@ -35,5 +35,12 @@ public class Price {
     this.begin = priceReference.getBegin();
     this.end = priceReference.getEnd();
     this.value = priceReference.getValue();
+  }
+
+  @Override
+  public int compareTo(Object o) {
+    if (this.getBegin().before(((Price) o).begin)) return -1;
+    if (this.getBegin().after(((Price) o).begin)) return 1;
+    else return 0;
   }
 }
