@@ -129,7 +129,7 @@ public class PriceJoinerUtil {
 
     if (oldP.getBegin().equals(newP.getBegin())) { // 1. Begin times equals
       if (oldP.getEnd().after(newP.getEnd())) { // 1.1. 1st end time after 2nd end time
-        oldP.setBegin(new Date(newP.getEnd().getTime() + 0));
+        oldP.setBegin(newP.getEnd());
         oldPricesForProcessing.add(oldP);
         result.add(newP);
       } else if (oldP.getEnd().equals(newP.getEnd())) { // 1.2. 1st end time equal 2nd end time
@@ -141,31 +141,31 @@ public class PriceJoinerUtil {
     } else if (oldP.getBegin().before(newP.getBegin())) { // 2. 1st begin time before 2nd begin time
       if (oldP.getEnd().after(newP.getEnd())) { // 2.1. 1st end time after 2nd end time
         Price secondPartOfOldP = new Price(oldP);
-        secondPartOfOldP.setBegin(new Date(newP.getEnd().getTime() + 0));
-        oldP.setEnd(new Date(newP.getBegin().getTime() - 0));
+        secondPartOfOldP.setBegin(newP.getEnd());
+        oldP.setEnd(newP.getBegin());
         oldPricesForProcessing.add(0, secondPartOfOldP);
         result.add(oldP);
         result.add(newP);
       } else if (oldP.getEnd().equals(newP.getEnd())) { // 2.2. 1st end time equal 2nd end time
-        oldP.setEnd(new Date(newP.getBegin().getTime() - 0));
+        oldP.setEnd(newP.getBegin());
         result.add(oldP);
         result.add(newP);
       } else if (oldP.getEnd().before(newP.getEnd())) { // 2.3. 1st end time before 2nd end time
-        oldP.setEnd(new Date(newP.getBegin().getTime() - 0));
+        oldP.setEnd(newP.getBegin());
         result.add(oldP);
         newPricesForProcessing.add(0, newP);
       } else if (oldP.getEnd().equals(newP.getBegin())) {// 2.4. 1st END time equal 2nd BEGIN time
-        oldP.setEnd(new Date(newP.getBegin().getTime() - 0));
+        oldP.setEnd(newP.getBegin());
         newPricesForProcessing.add(newP);
         result.add(oldP);
       }
     } else if (oldP.getBegin().after(newP.getBegin())) { // 3. 1st begin time after 2nd begin time
       if (oldP.getBegin().equals(newP.getEnd())) { // 3.1. 1st begin time equal 2nd end time
-        oldP.setBegin(new Date(newP.getEnd().getTime() + 0));
+        oldP.setBegin(newP.getEnd());
         oldPricesForProcessing.add(0, oldP);
         result.add(newP);
       } else if (oldP.getEnd().after(newP.getEnd())) { // 3.2. 1st end time after 2nd end time
-        oldP.setBegin(new Date(newP.getEnd().getTime() + 0));
+        oldP.setBegin(newP.getEnd());
         oldPricesForProcessing.add(0, oldP);
         result.add(newP);
       } else if (oldP.getEnd().equals(newP.getEnd())) { // 3.3. 1st end time equal 2nd end time
